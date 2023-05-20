@@ -9,3 +9,5 @@ Os exemplos estão distribuidos da seguinte maneira:
 - Hello 3D - Phong - Projeto base para a atividade prática proposta no Módulo 4
 
 Para configurar os projetos em sua máquina, vá para o arquivo HELP-SETTINGS.md
+
+# Teste do GIT
