@@ -25,7 +25,7 @@ using namespace std;
 #include <glm/gtc/type_ptr.hpp>
 
 // Protótipo da função de callback de teclado
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
+void key_callback(GLFWwindow *window, int key, int scancode, int action, int mode);
 
 // Protótipos das funções
 int setupShader();
@@ -35,28 +35,78 @@ int setupGeometry();
 const GLuint WIDTH = 1000, HEIGHT = 1000;
 
 // Código fonte do Vertex Shader (em GLSL): ainda hardcoded
-const GLchar* vertexShaderSource = "#version 450\n"
-"layout (location = 0) in vec3 position;\n"
-"layout (location = 1) in vec3 color;\n"
-"uniform mat4 model;\n"
-"out vec4 finalColor;\n"
-"void main()\n"
-"{\n"
-//...pode ter mais linhas de código aqui!
-"gl_Position = model * vec4(position, 1.0);\n"
-"finalColor = vec4(color, 1.0);\n"
-"}\0";
+const GLchar *vertexShaderSource = "#version 450\n"
+                                   "layout (location = 0) in vec3 position;\n"
+                                   "layout (location = 1) in vec3 color;\n"
+                                   "uniform mat4 model;\n"
+                                   "out vec4 finalColor;\n"
+                                   "void main()\n"
+                                   "{\n"
+                                   //...pode ter mais linhas de código aqui!
+                                   "gl_Position = model * vec4(position, 1.0);\n"
+                                   "finalColor = vec4(color, 1.0);\n"
+                                   "}\0";
 
 // Códifo fonte do Fragment Shader (em GLSL): ainda hardcoded
-const GLchar* fragmentShaderSource = "#version 450\n"
-"in vec4 finalColor;\n"
-"out vec4 color;\n"
-"void main()\n"
-"{\n"
-"color = finalColor;\n"
-"}\n\0";
+const GLchar *fragmentShaderSource = "#version 450\n"
+                                     "in vec4 finalColor;\n"
+                                     "out vec4 color;\n"
+                                     "void main()\n"
+                                     "{\n"
+                                     "color = finalColor;\n"
+                                     "}\n\0";
 
-bool rotateX = false, rotateY = false, rotateZ = false;
+bool translateIn,
+    translateOut,
+    translateLeft,
+    translateRight,
+    translateUp,
+    translateDown,
+    scaleIncrease,
+    scaleDecrease,
+    rotateX,
+    rotateY,
+    rotateZ = false;
+
+float scalePosition = 1.0f;
+float translatePosition = 0.0f;
+
+enum Direction
+{
+    Decrease,
+    Increase
+};
+
+float getScalePosition(Direction dir)
+{
+
+    if (dir == Direction::Decrease)
+    {
+        return scalePosition < 0 ? 1.0f : scalePosition - 0.001f;
+    }
+
+    if (dir == Direction::Increase)
+    {
+        return scalePosition > 2 ? 1.0f : scalePosition + 0.001f;
+    }
+
+    return 0.0f;
+}
+
+float getTranslatePosition(Direction dir)
+{
+    if (dir == Direction::Decrease)
+    {
+        return translatePosition < -1.5f ? 1.5f : translatePosition - 0.001f;
+    }
+
+    if (dir == Direction::Increase)
+    {
+        return translatePosition > 1.5f ? -1.5f : translatePosition + 0.001f;
+    }
+
+    return 0.0f;
+}
 
 // Função MAIN
 int main()
@@ -79,7 +129,7 @@ int main()
     // #endif
 
     // Criação da janela GLFW
-    GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Cubos 3D", nullptr, nullptr);
+    GLFWwindow *window = glfwCreateWindow(WIDTH, HEIGHT, "Cubos 3D", nullptr, nullptr);
     glfwMakeContextCurrent(window);
 
     // Fazendo o registro da função de callback para a janela GLFW
@@ -92,8 +142,8 @@ int main()
     }
 
     // Obtendo as informações de versão
-    const GLubyte* renderer = glGetString(GL_RENDERER); /* get renderer string */
-    const GLubyte* version = glGetString(GL_VERSION);   /* version as a string */
+    const GLubyte *renderer = glGetString(GL_RENDERER); /* get renderer string */
+    const GLubyte *version = glGetString(GL_VERSION);   /* version as a string */
     cout << "Renderer: " << renderer << endl;
     cout << "OpenGL version supported " << version << endl;
 
@@ -146,6 +196,46 @@ int main()
         {
             model = glm::rotate(model, angle, glm::vec3(0.0f, 0.0f, 1.0f));
         }
+        else if (translateUp)
+        {
+            translatePosition = getTranslatePosition(Direction::Increase);
+            model = glm::translate(model, glm::vec3(0.0f, translatePosition, 0.0f));
+        }
+        else if (translateDown)
+        {
+            translatePosition = getTranslatePosition(Direction::Decrease);
+            model = glm::translate(model, glm::vec3(0.0f, translatePosition, 0.0f));
+        }
+        else if (translateLeft)
+        {
+            translatePosition = getTranslatePosition(Direction::Decrease);
+            model = glm::translate(model, glm::vec3(translatePosition, 0.0f, 0.0f));
+        }
+        else if (translateRight)
+        {
+            translatePosition = getTranslatePosition(Direction::Increase);
+            model = glm::translate(model, glm::vec3(translatePosition, 0.0f, 0.0f));
+        }
+        else if (translateIn)
+        {
+            translatePosition = getTranslatePosition(Direction::Increase);
+            model = glm::translate(model, glm::vec3(0.0f, 0.0f, translatePosition));
+        }
+        else if (translateOut)
+        {
+            translatePosition = getTranslatePosition(Direction::Decrease);
+            model = glm::translate(model, glm::vec3(0.0f, 0.0f, translatePosition));
+        }
+        else if (scaleIncrease)
+        {
+            scalePosition = getScalePosition(Direction::Increase);
+            model = glm::scale(model, glm::vec3(scalePosition, scalePosition, scalePosition));
+        }
+        else if (scaleDecrease)
+        {
+            scalePosition = getScalePosition(Direction::Decrease);
+            model = glm::scale(model, glm::vec3(scalePosition, scalePosition, scalePosition));
+        }
 
         glUniformMatrix4fv(modelLoc, 1, false, glm::value_ptr(model));
         // Chamada de desenho - drawcall
@@ -173,30 +263,24 @@ int main()
 // Função de callback de teclado - só pode ter uma instância (deve ser estática se
 // estiver dentro de uma classe) - É chamada sempre que uma tecla for pressionada
 // ou solta via GLFW
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
+void key_callback(GLFWwindow *window, int key, int scancode, int action, int mode)
 {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GL_TRUE);
 
-    if (key == GLFW_KEY_X && action == GLFW_PRESS)
+    if (action == GLFW_PRESS)
     {
-        rotateX = true;
-        rotateY = false;
-        rotateZ = false;
-    }
-
-    if (key == GLFW_KEY_Y && action == GLFW_PRESS)
-    {
-        rotateX = false;
-        rotateY = true;
-        rotateZ = false;
-    }
-
-    if (key == GLFW_KEY_Z && action == GLFW_PRESS)
-    {
-        rotateX = false;
-        rotateY = false;
-        rotateZ = true;
+        rotateX = key == GLFW_KEY_X;
+        rotateY = key == GLFW_KEY_Y;
+        rotateZ = key == GLFW_KEY_Z;
+        translateLeft = key == GLFW_KEY_A;
+        translateRight = key == GLFW_KEY_D;
+        translateIn = key == GLFW_KEY_W;
+        translateOut = key == GLFW_KEY_S;
+        translateUp = key == GLFW_KEY_UP;
+        translateDown = key == GLFW_KEY_DOWN;
+        scaleIncrease = key == GLFW_KEY_RIGHT_BRACKET;
+        scaleDecrease = key == GLFW_KEY_LEFT_BRACKET;
     }
 }
 
@@ -219,7 +303,7 @@ int setupShader()
     {
         glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
         std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n"
-            << infoLog << std::endl;
+                  << infoLog << std::endl;
     }
     // Fragment shader
     GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
@@ -231,7 +315,7 @@ int setupShader()
     {
         glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
         std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n"
-            << infoLog << std::endl;
+                  << infoLog << std::endl;
     }
     // Linkando os shaders e criando o identificador do programa de shader
     GLuint shaderProgram = glCreateProgram();
@@ -244,7 +328,7 @@ int setupShader()
     {
         glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
         std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n"
-            << infoLog << std::endl;
+                  << infoLog << std::endl;
     }
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
@@ -266,63 +350,243 @@ int setupGeometry()
     GLfloat vertices[] = {
         // Cube front
         // x    y    z    r    g    b
-        -0.5, -0.5, 0.5, 1.0, 0.0, 0.0,
-        -0.5, 0.5, 0.5, 0.0, 1.0, 0.0,
-        0.5, -0.5, 0.5, 0.0, 0.0, 1.0,
+        -0.5,
+        -0.5,
+        0.5,
+        1.0,
+        0.0,
+        0.0,
+        -0.5,
+        0.5,
+        0.5,
+        0.0,
+        1.0,
+        0.0,
+        0.5,
+        -0.5,
+        0.5,
+        0.0,
+        0.0,
+        1.0,
 
-        -0.5, 0.5, 0.5, 0.0, 0.0, 1.0,
-        0.5, 0.5, 0.5, 1.0, 0.0, 0.0,
-        0.5, -0.5, 0.5, 0.0, 1.0, 0.0,
+        -0.5,
+        0.5,
+        0.5,
+        0.0,
+        0.0,
+        1.0,
+        0.5,
+        0.5,
+        0.5,
+        1.0,
+        0.0,
+        0.0,
+        0.5,
+        -0.5,
+        0.5,
+        0.0,
+        1.0,
+        0.0,
 
         // Cube right
         // x    y    z    r    g    b
-        0.5, -0.5, -0.5, 1.0, 0.0, 0.0,
-        0.5, 0.5, -0.5, 0.0, 0.0, 1.0,
-        0.5, -0.5, 0.5, 0.0, 1.0, 0.0,
+        0.5,
+        -0.5,
+        -0.5,
+        1.0,
+        0.0,
+        0.0,
+        0.5,
+        0.5,
+        -0.5,
+        0.0,
+        0.0,
+        1.0,
+        0.5,
+        -0.5,
+        0.5,
+        0.0,
+        1.0,
+        0.0,
 
-        0.5, 0.5, -0.5, 0.0, 1.0, 0.0,
-        0.5, 0.5, 0.5, 1.0, 0.0, 0.0,
-        0.5, -0.5, 0.5, 0.0, 0.0, 1.0,
+        0.5,
+        0.5,
+        -0.5,
+        0.0,
+        1.0,
+        0.0,
+        0.5,
+        0.5,
+        0.5,
+        1.0,
+        0.0,
+        0.0,
+        0.5,
+        -0.5,
+        0.5,
+        0.0,
+        0.0,
+        1.0,
 
         // Cube back
         // x    y    z    r    g    b
-        -0.5, 0.5, -0.5, 1.0, 0.0, 0.0,
-        0.5, 0.5, -0.5, 0.0, 1.0, 0.0,
-        -0.5, -0.5, -0.5, 0.0, 0.0, 1.0,
+        -0.5,
+        0.5,
+        -0.5,
+        1.0,
+        0.0,
+        0.0,
+        0.5,
+        0.5,
+        -0.5,
+        0.0,
+        1.0,
+        0.0,
+        -0.5,
+        -0.5,
+        -0.5,
+        0.0,
+        0.0,
+        1.0,
 
-        0.5, 0.5, -0.5, 0.0, 0.0, 1.0,
-        0.5, -0.5, -0.5, 1.0, 0.0, 0.0,
-        -0.5, -0.5, -0.5, 0.0, 1.0, 0.0,
+        0.5,
+        0.5,
+        -0.5,
+        0.0,
+        0.0,
+        1.0,
+        0.5,
+        -0.5,
+        -0.5,
+        1.0,
+        0.0,
+        0.0,
+        -0.5,
+        -0.5,
+        -0.5,
+        0.0,
+        1.0,
+        0.0,
 
         // Cube left
         // x    y    z    r    g    b
-        -0.5, 0.5, -0.5, 1.0, 0.0, 0.0,
-        -0.5, 0.5, 0.5, 0.0, 1.0, 0.0,
-        -0.5, -0.5, -0.5, 0.0, 0.0, 1.0,
+        -0.5,
+        0.5,
+        -0.5,
+        1.0,
+        0.0,
+        0.0,
+        -0.5,
+        0.5,
+        0.5,
+        0.0,
+        1.0,
+        0.0,
+        -0.5,
+        -0.5,
+        -0.5,
+        0.0,
+        0.0,
+        1.0,
 
-        -0.5, 0.5, 0.5, 0.0, 1.0, 0.0,
-        -0.5, -0.5, 0.5, 1.0, 0.0, 0.0,
-        -0.5, -0.5, -0.5, 0.0, 1.0, 1.0,
+        -0.5,
+        0.5,
+        0.5,
+        0.0,
+        1.0,
+        0.0,
+        -0.5,
+        -0.5,
+        0.5,
+        1.0,
+        0.0,
+        0.0,
+        -0.5,
+        -0.5,
+        -0.5,
+        0.0,
+        1.0,
+        1.0,
 
         // Cube top
         // x    y    z    r    g    b
-        -0.5, 0.5, -0.5, 1.0, 0.0, 0.0,
-        0.5, 0.5, -0.5, 0.0, 1.0, 0.0,
-        -0.5, 0.5, 0.5, 0.0, 0.0, 1.0,
+        -0.5,
+        0.5,
+        -0.5,
+        1.0,
+        0.0,
+        0.0,
+        0.5,
+        0.5,
+        -0.5,
+        0.0,
+        1.0,
+        0.0,
+        -0.5,
+        0.5,
+        0.5,
+        0.0,
+        0.0,
+        1.0,
 
-        0.5, 0.5, -0.5, 0.0, 1.0, 0.0,
-        0.5, 0.5, 0.5, 1.0, 0.0, 0.0,
-        -0.5, 0.5, 0.5, 0.0, 1.0, 1.0,
+        0.5,
+        0.5,
+        -0.5,
+        0.0,
+        1.0,
+        0.0,
+        0.5,
+        0.5,
+        0.5,
+        1.0,
+        0.0,
+        0.0,
+        -0.5,
+        0.5,
+        0.5,
+        0.0,
+        1.0,
+        1.0,
 
         // Cube bottom
         // x    y    z    r    g    b
-        0.5, -0.5, -0.5, 1.0, 0.0, 0.0,
-        0.5, -0.5, 0.5, 0.0, 1.0, 0.0,
-        -0.5, -0.5, -0.5, 0.0, 1.0, 1.0,
+        0.5,
+        -0.5,
+        -0.5,
+        1.0,
+        0.0,
+        0.0,
+        0.5,
+        -0.5,
+        0.5,
+        0.0,
+        1.0,
+        0.0,
+        -0.5,
+        -0.5,
+        -0.5,
+        0.0,
+        1.0,
+        1.0,
 
-        0.5, -0.5, 0.5, 0.0, 1.0, 0.0,
-        -0.5, -0.5, 0.5, 1.0, 0.0, 0.0,
-        -0.5, -0.5, -0.5, 0.0, 1.0, 1.0,
+        0.5,
+        -0.5,
+        0.5,
+        0.0,
+        1.0,
+        0.0,
+        -0.5,
+        -0.5,
+        0.5,
+        1.0,
+        0.0,
+        0.0,
+        -0.5,
+        -0.5,
+        -0.5,
+        0.0,
+        1.0,
+        1.0,
     };
 
     GLuint VBO, VAO;
@@ -352,11 +616,11 @@ int setupGeometry()
     //  Deslocamento a partir do byte zero
 
     // Atributo posição (x, y, z)
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid *)0);
     glEnableVertexAttribArray(0);
 
     // Atributo cor (r, g, b)
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid *)(3 * sizeof(GLfloat)));
     glEnableVertexAttribArray(1);
 
     // Observe que isso é permitido, a chamada para glVertexAttribPointer registrou o VBO como o objeto de buffer de vértice
