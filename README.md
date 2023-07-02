@@ -1,4 +1,23 @@
 # Computação Gráfica
+
+## Tarefas Finalizadas
+
+[M1 | Tarefa - Criando o ambiente de Programação de cenas 3D](https://github.com/StudyWithIgor/CGCCHibrido/blob/main/Hello3D/RESULT.md)
+
+[M2 | Tarefa - Instanciando objetos na cena 3D](https://github.com/StudyWithIgor/CGCCHibrido/blob/main/3DCubes/Exericio8/Origem.cpp)
+
+[M3 | Tarefa - Adicionando Texturas](https://github.com/StudyWithIgor/CGCCHibrido/tree/main/modulo-texturas)
+
+[M4 | Tarefa - Adicionando Iluminação](https://github.com/StudyWithIgor/CGCCHibrido/tree/main/modulo-iluminacao)
+
+[M5 | Tarefa - Adicionando uma câmera em primeira pessoa](https://github.com/StudyWithIgor/CGCCHibrido/tree/main/modulo-camera)
+
+[M6 | Tarefa - Definindo trajetórias para alguns objetos](https://github.com/StudyWithIgor/CGCCHibrido/tree/main/modulo-trajetoria)
+
+[Grau B](https://github.com/StudyWithIgor/CGCCHibrido/tree/main/modulo-final)
+
+## Introdução:
+
 Repositório de exemplos de códigos em C++ utilizando OpenGL moderna (3.3+) criado para a Atividade Acadêmica Computação Gráfica do curso Ciência da Computação (modalidade híbrida)
 
 Os exemplos estão distribuidos da seguinte maneira:
@@ -10,7 +29,7 @@ Os exemplos estão distribuidos da seguinte maneira:
 
 Para configurar os projetos em sua máquina, vá para o arquivo HELP-SETTINGS.md
 
-# Instruções Aula Vivencial 20/05/23
+## Instruções Aula Vivencial 20/05/23:
 
 
 - só deve rodar direto no Windows, para Linux ou Mac precisa instalar HELP-SETTINGS.md
